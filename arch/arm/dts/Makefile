@@ -254,6 +254,7 @@ dtb-$(CONFIG_ARCH_TEGRA) += tegra20-harmony.dtb \
 	tegra20-trimslice.dtb \
 	tegra20-ventana.dtb \
 	tegra20-colibri.dtb \
+	tegra20-qemu.dtb \
 	tegra30-apalis.dtb \
 	tegra30-asus-nexus7-grouper-PM269.dtb \
 	tegra30-asus-nexus7-grouper-E1565.dtb \

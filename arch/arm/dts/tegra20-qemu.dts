@@ -1,0 +1,165 @@
+// SPDX-License-Identifier: GPL-2.0
+/dts-v1/;
+
+// /memreserve/ 0x2E600000 0x11A00000; /* for Tegra2VDE-reTool */
+
+#include <dt-bindings/input/input.h>
+#include "tegra20.dtsi"
+
+/ {
+	model = "Tegra20 QEMU";
+	compatible = "grate,qemu", "nvidia,tegra20";
+
+	chosen {
+		stdout-path = &uartd;
+	};
+
+	aliases {
+		mmc0 = &sdmmc4;
+
+		rtc0 = "/rtc@7000e000";
+
+		usb0 = &usb1;
+		usb2 = &usb3;
+	};
+
+	memory {
+		device_type = "memory";
+		reg = <0x00000000 0x40000000>;
+	};
+
+	host1x@50000000 {
+		dc@54200000 {
+			rgb {
+				status = "okay";
+
+				nvidia,panel = <&panel>;
+			};
+		};
+	};
+
+	uartd: serial@70006300 {
+		status = "okay";
+	};
+
+	pwm: pwm@7000a000 {
+		status = "okay";
+	};
+
+	ethernet@a0000000 {
+		compatible = "smsc,lan9118", "smsc,lan9115";
+		reg = <0xa0000000 0x10000>;
+		interrupts = <GIC_SPI 95 IRQ_TYPE_LEVEL_HIGH>;
+		phy-mode = "mii";
+		reg-io-width = <4>;
+		smsc,irq-active-high;
+		smsc,irq-push-pull;
+		vdd33a-supply = <&vdd_3v3_reg>;
+		vddvario-supply = <&vdd_3v3_reg>;
+	};
+
+	usb1: usb@c5000000 {
+		status = "okay";
+	};
+
+	usb3: usb@c5008000 {
+		status = "okay";
+	};
+
+	sdmmc4: sdhci@c8000600 {
+		status = "okay";
+		bus-width = <8>;
+		non-removable;
+	};
+
+	backlight: backlight {
+		compatible = "pwm-backlight";
+
+		enable-gpios = <&gpio TEGRA_GPIO(D, 4) GPIO_ACTIVE_HIGH>;
+		power-supply = <&vdd_bl_reg>;
+		pwms = <&pwm 2 5000000>;
+
+		brightness-levels = <1 35 70 105 140 175 210 255>;
+		default-brightness-level = <5>;
+	};
+
+	clk32k_in: clock-32k-in {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <32768>;
+		clock-output-names = "ref-oscillator";
+	};
+
+	gpio-keys {
+		compatible = "gpio-keys";
+
+		key-power {
+			label = "Power";
+			gpios = <&gpio TEGRA_GPIO(I, 3) GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_ENTER>;
+		};
+
+		key-volume-up {
+			label = "Volume Up";
+			gpios = <&gpio TEGRA_GPIO(Q, 4) GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_UP>;
+		};
+
+		key-volume-down {
+			label = "Volume Down";
+			gpios = <&gpio TEGRA_GPIO(Q, 5) GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_DOWN>;
+		};
+	};
+
+	panel: panel {
+		compatible = "simple-panel";
+
+		power-supply = <&vdd_pnl_reg>;
+		enable-gpios = <&gpio TEGRA_GPIO(B, 2) GPIO_ACTIVE_HIGH>;
+
+		backlight = <&backlight>;
+
+		display-timings {
+			timing@0 {
+				clock-frequency = <72000000>;
+
+				hactive = <1366>;
+				hfront-porch = <58>;
+				hback-porch = <58>;
+				hsync-len = <58>;
+
+				vactive = <768>;
+				vfront-porch = <4>;
+				vback-porch = <4>;
+				vsync-len = <4>;
+			};
+		};
+	};
+
+	vdd_3v3_reg: regulator-3v3 {
+		compatible = "regulator-fixed";
+		regulator-name = "vdd_3v3_vs";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		regulator-always-on;
+	};
+
+	vdd_bl_reg: regulator-bl {
+		compatible = "regulator-fixed";
+		regulator-name = "vdd_backlight";
+		regulator-min-microvolt = <2800000>;
+		regulator-max-microvolt = <2800000>;
+		gpio = <&gpio TEGRA_GPIO(W, 0) GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+	};
+
+	vdd_pnl_reg: regulator-pnl {
+		compatible = "regulator-fixed";
+		regulator-name = "vdd_panel";
+		regulator-min-microvolt = <2800000>;
+		regulator-max-microvolt = <2800000>;
+		gpio = <&gpio TEGRA_GPIO(C, 6) GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+	};
+};
