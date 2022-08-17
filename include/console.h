@@ -65,6 +65,13 @@ void console_record_reset(void);
 int console_record_reset_enable(void);
 
 /**
+ * console_record_overflow() - returns state of buffers overflow
+ * 
+ * Return: true if the console buffer was overflowed
+ */
+bool console_record_overflow(void);
+
+/**
  * console_record_readline() - Read a line from the console output
  *
  * This reads the next available line from the console output previously
@@ -83,6 +90,13 @@ int console_record_readline(char *str, int maxlen);
  * Return: available bytes (0 if empty)
  */
 int console_record_avail(void);
+
+/**
+ * console_record_isempty() - Returns if console output is empty
+ *
+ * Return: true if empty
+ */
+bool console_record_isempty(void);
 
 /**
  * console_in_puts() - Write a string to the console input buffer
