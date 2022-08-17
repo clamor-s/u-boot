@@ -818,6 +818,8 @@ int console_record_init(void)
 	ret = membuff_new((struct membuff *)&gd->console_in,
 			  CONFIG_CONSOLE_RECORD_IN_SIZE);
 
+	gd->flags |= GD_FLG_RECORD;
+	
 	return ret;
 }
 
@@ -836,11 +838,13 @@ int console_record_reset_enable(void)
 	return 0;
 }
 
+bool console_record_overflow(void)
+{
+	return gd->flags & GD_FLG_RECORD_OVF ? true : false;
+}
+
 int console_record_readline(char *str, int maxlen)
 {
-	if (gd->flags & GD_FLG_RECORD_OVF)
-		return -ENOSPC;
-
 	return membuff_readline((struct membuff *)&gd->console_out, str,
 				maxlen, '\0');
 }
@@ -848,6 +852,11 @@ int console_record_readline(char *str, int maxlen)
 int console_record_avail(void)
 {
 	return membuff_avail((struct membuff *)&gd->console_out);
+}
+
+bool console_record_isempty(void)
+{
+	return membuff_isempty((struct membuff *)&gd->console_out);
 }
 
 int console_in_puts(const char *str)

@@ -53,14 +53,13 @@ long ut_check_delta(ulong last)
 
 static int readline_check(struct unit_test_state *uts)
 {
-	int ret;
-
-	ret = console_record_readline(uts->actual_str, sizeof(uts->actual_str));
-	if (ret == -ENOSPC) {
+	if (console_record_overflow()) {
 		ut_fail(uts, __FILE__, __LINE__, __func__,
 			"Console record buffer too small - increase CONFIG_CONSOLE_RECORD_OUT_SIZE");
-		return ret;
+		return -ENOSPC;
 	}
+
+	console_record_readline(uts->actual_str, sizeof(uts->actual_str));
 
 	return 0;
 }
