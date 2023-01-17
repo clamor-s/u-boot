@@ -106,6 +106,12 @@ config CLK_CDCE9XX
 	   Enable the clock synthesizer driver for CDCE913/925/937/949
 	   series of chips.
 
+config CLK_GPIO
+	bool "Enable GPIO gate clock driver"
+	depends on CLK && DM_GPIO
+	help
+	   Enable support of clock gating via GPIO switch.
+
 config CLK_ICS8N3QV01
 	bool "Enable ICS8N3QV01 VCXO driver"
 	depends on CLK
