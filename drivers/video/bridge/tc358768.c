@@ -115,8 +115,8 @@
 #define TC358768_DSI_CONTROL_EOTDIS	BIT(0)
 
 /* TC358768_DSI_CONFW (0x0500) register */
-#define TC358768_DSI_CONFW_MODE_SET	(5 << 29)
-#define TC358768_DSI_CONFW_MODE_CLR	(6 << 29)
+#define TC358768_DSI_CONFW_MODE_SET		(5 << 29)
+#define TC358768_DSI_CONFW_MODE_CLR		(6 << 29)
 #define TC358768_DSI_CONFW_ADDR_DSI_CONTROL	(0x3 << 24)
 
 struct tc358768_priv {
@@ -134,8 +134,8 @@ struct tc358768_priv {
 
 	struct gpio_desc reset_gpio;
 
-	u32 pd_lines; /* number of Parallel Port Input Data Lines */
-	u32 dsi_lanes; /* number of DSI Lanes */
+	u32 pd_lines;	/* number of Parallel Port Input Data Lines */
+	u32 dsi_lanes;	/* number of DSI Lanes */
 
 	/* Parameters for PLL programming */
 	u32 fbd;	/* PLL feedback divider */
@@ -145,51 +145,62 @@ struct tc358768_priv {
 	u32 dsiclk;	/* pll_clk / 2 */
 };
 
-static void tc358768_write(struct udevice *dev, u32 reg, u32 val)
+static int tc358768_read16(struct udevice *dev, u32 reg, u16 *val)
 {
-	int len = 4;
-	int i, ret;
+	u8 buf[2];
+	int ret;
 
-	/* 16-bit register? */
-	if (reg < 0x100 || reg >= 0x600)
-		len = 2;
+	ret = dm_i2c_read(dev, reg, buf, 2);
+	*val = (buf[0] << 8) | buf[1];
+	printf("%s 0x%04x<<0x%04x\n", __func__, reg, *val);
 
-	u8 command[len];
+	return ret;
+}
 
-	for (i = len; i > 0; i--) {
-		command[i-1] = val & 0xFF;
-		val = val >> 8;
-	}
+static int tc358768_write16(struct udevice *dev, u32 reg, u16 val)
+{
+	u8 buf[2];
 
-	ret = dm_i2c_write(dev, reg, command, len);
-	if (ret)
-		printf("%s: failed to write 0x%x to reg 0x%x (%d)\n",
-			__func__, val, reg, ret);
+	buf[1] = val & 0xff;
+	buf[0] = val >> 8;
+	printf("%s 0x%04x>>0x%04x\n", __func__, reg, val);
+
+	return dm_i2c_write(dev, reg, buf, 2);
 }
 
 static void tc358768_read(struct udevice *dev, u32 reg, u32 *val)
 {
-	int len = 4;
-	int i, ret;
-	u32 output = 0;
+	u16 out1 = 0, out2 = 0;
 
 	/* 16-bit register? */
-	if (reg < 0x100 || reg >= 0x600)
-		len = 2;
-
-	u8 data[len];
-
-	ret = dm_i2c_read(dev, reg, data, len);
-	if (ret)
-		printf("%s: failed to read from reg 0x%x (%d)\n",
-			__func__, reg, ret);
-
-	for (i = len; i > 0; i--) {
-		output |= data[i-1];
-		output = output << 8;
+	if (reg < 0x100 || reg >= 0x600) {
+		tc358768_read16(dev, reg, &out1);
+	} else {
+		tc358768_read16(dev, reg, &out1);
+		tc358768_read16(dev, reg + 2, &out2);
 	}
 
-	*val = output;
+	*val = (out2 << 16) | out1;
+}
+
+static void tc358768_write(struct udevice *dev, u32 reg, u32 val)
+{
+	/* 16-bit register? */
+	if (reg < 0x100 || reg >= 0x600) {
+		tc358768_write16(dev, reg, val);
+	} else {
+		u16 cmd1, cmd2;
+
+		cmd1 = val & 0xFFFF;
+		cmd2 = val >> 16;
+
+		tc358768_write16(dev, reg, cmd1);
+		tc358768_write16(dev, reg + 2, cmd2);
+	}
+
+	u32 dump;
+	tc358768_read(dev, reg, &dump);
+	printf("%s: reg 0x%x, dump 0x%x\n",__func__, reg, dump);
 }
 
 static void tc358768_update_bits(struct udevice *dev, u32 reg, u32 mask,
@@ -480,6 +491,7 @@ static int tc358768_attach(struct udevice *dev)
 		return -EINVAL;
 	}
 
+#if 0
 	/* VSDly[9:0] */
 	video_start = max(video_start, internal_delay + 1) - internal_delay;
 	tc358768_write(dev, TC358768_VSDLY, video_start);
@@ -675,6 +687,7 @@ static int tc358768_attach(struct udevice *dev)
 	ret = panel_set_backlight(priv->panel, BACKLIGHT_DEFAULT);
 	if (ret)
 		return ret;
+#endif
 
 	return 0;
 }
