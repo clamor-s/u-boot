@@ -1,0 +1,6 @@
+SURFACE_2 BOARD
+M:	Jonas Schwöbel <jonasschwoebel@yahoo.de>
+S:	Maintained
+F:	board/microsoft/surface-2/
+F:	include/configs/surface-2.h
+F:	configs/surface-2_defconfig
