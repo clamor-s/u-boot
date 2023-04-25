@@ -8,6 +8,7 @@ config MENU
 
 config CONSOLE_RECORD
 	bool "Console recording"
+	default y
 	help
 	  This provides a way to record console output (and provide console
 	  input) through circular buffers. This is mostly useful for testing.
@@ -26,7 +27,7 @@ config CONSOLE_RECORD_INIT_F
 config CONSOLE_RECORD_OUT_SIZE
 	hex "Output buffer size"
 	depends on CONSOLE_RECORD
-	default 0x400 if CONSOLE_RECORD
+	default 0x10000 if CONSOLE_RECORD
 	help
 	  Set the size of the console output buffer. When this fills up, no
 	  more data will be recorded until some is removed. The buffer is
