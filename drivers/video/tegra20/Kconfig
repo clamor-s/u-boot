@@ -16,6 +16,15 @@ config VIDEO_DSI_TEGRA30
 	   T30 has native support for DSI panels. This option enables support
 	   for such panels which can be used on endeavoru and tf600t.
 
+config VIDEO_HDMI_TEGRA30
+	bool "Enable Tegra 30 HDMI support"
+	depends on PANEL && DM_I2C && DM_REGULATOR
+	select I2C_EDID
+	select VIDEO_TEGRA20
+	help
+	   T30 has native support for HDMI. This option enables support
+	   for such connection and can be used for any supported device.
+
 config TEGRA_BACKLIGHT_PWM
 	bool "Enable Tegra DC PWM backlight support"
 	depends on BACKLIGHT

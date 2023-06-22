@@ -418,7 +418,8 @@ static int tegra_lcd_of_to_plat(struct udevice *dev)
 	}
 
 	if (!strcmp(priv->panel->name, TEGRA_DSI_A) ||
-	    !strcmp(priv->panel->name, TEGRA_DSI_B)) {
+	    !strcmp(priv->panel->name, TEGRA_DSI_B) ||
+	    !strcmp(priv->panel->name, TEGRA_HDMI)) {
 		struct tegra_dc_plat *dc_plat = dev_get_plat(priv->panel);
 
 		dc_plat->dev = dev;

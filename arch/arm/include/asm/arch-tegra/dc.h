@@ -443,6 +443,11 @@ enum win_color_depth_id {
 #define	WINDOW_D_SELECT		BIT(7)
 #define	WINDOW_H_SELECT		BIT(8)
 
+/* DC_DISP_DISP_SIGNAL_OPTIONS0 0x400 */
+#define H_PULSE0_ENABLE 	BIT(8)
+#define H_PULSE1_ENABLE 	BIT(10)
+#define H_PULSE2_ENABLE 	BIT(12)
+
 /* DC_DISP_DISP_WIN_OPTIONS 0x402 */
 #define	CURSOR_ENABLE		BIT(16)
 #define	SOR_ENABLE		BIT(25)
@@ -498,6 +503,22 @@ enum {
 	DATA_ORDER_RED_BLUE,
 	DATA_ORDER_BLUE_RED,
 };
+
+/* DC_DISP_DISP_COLOR_CONTROL 0x430 */
+enum {
+	BASE_COLOR_SIZE_666,
+	BASE_COLOR_SIZE_111,
+	BASE_COLOR_SIZE_222,
+	BASE_COLOR_SIZE_333,
+	BASE_COLOR_SIZE_444,
+	BASE_COLOR_SIZE_555,
+	BASE_COLOR_SIZE_565,
+	BASE_COLOR_SIZE_332,
+	BASE_COLOR_SIZE_888,
+};
+#define DITHER_CONTROL_DISABLE (0 << 8)
+#define DITHER_CONTROL_ORDERED (2 << 8)
+#define DITHER_CONTROL_ERRDIFF (3 << 8)
 
 /* DC_DISP_DATA_ENABLE_OPTIONS 0x432 */
 #define DE_SELECT_SHIFT		0
@@ -569,10 +590,30 @@ enum {
 #define DC_N_WINDOWS			5
 #define DC_REG_SAVE_SPACE		(DC_N_WINDOWS + 5)
 
+#define PULSE_MODE_NORMAL	(0 << 3)
+#define PULSE_MODE_ONE_CLOCK	(1 << 3)
+#define PULSE_POLARITY_HIGH	(0 << 4)
+#define PULSE_POLARITY_LOW	(1 << 4)
+#define PULSE_QUAL_ALWAYS	(0 << 6)
+#define PULSE_QUAL_VACTIVE	(2 << 6)
+#define PULSE_QUAL_VACTIVE1	(3 << 6)
+#define PULSE_LAST_START_A	(0 << 8)
+#define PULSE_LAST_END_A	(1 << 8)
+#define PULSE_LAST_START_B	(2 << 8)
+#define PULSE_LAST_END_B	(3 << 8)
+#define PULSE_LAST_START_C	(4 << 8)
+#define PULSE_LAST_END_C	(5 << 8)
+#define PULSE_LAST_START_D	(6 << 8)
+#define PULSE_LAST_END_D	(7 << 8)
+
+#define PULSE_START(x)		(((x) & 0xfff) <<  0)
+#define PULSE_END(x)		(((x) & 0xfff) << 16)
+
 #define TEGRA_DC_A		"dc@54200000"
 #define TEGRA_DC_B		"dc@54240000"
 #define TEGRA_DSI_A		"dsi@54300000"
 #define TEGRA_DSI_B		"dsi@54400000"
+#define TEGRA_HDMI		"hdmi@54280000"
 
 struct tegra_dc_plat {
 	struct udevice *dev;		/* Display controller device */
