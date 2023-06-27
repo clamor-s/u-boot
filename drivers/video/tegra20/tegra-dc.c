@@ -467,6 +467,7 @@ static const struct video_ops tegra_lcd_ops = {
 static const struct udevice_id tegra_lcd_ids[] = {
 	{ .compatible = "nvidia,tegra20-dc" },
 	{ .compatible = "nvidia,tegra30-dc" },
+	{ .compatible = "nvidia,tegra114-dc" },
 	{ }
 };
 
