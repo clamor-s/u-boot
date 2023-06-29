@@ -8,6 +8,10 @@ config TARGET_DALMORE
 	bool "NVIDIA Tegra114 Dalmore evaluation board"
 	select BOARD_LATE_INIT
 
+config TARGET_TEGRATAB
+	bool "NVIDIA Tegra114 TegraTab evaluation board"
+	select BOARD_LATE_INIT
+
 config TARGET_TRANSFORMER_T114
 	bool "ASUS Tegra114 Transformer board"
 	select BOARD_LATE_INIT
@@ -19,5 +23,6 @@ config SYS_SOC
 
 source "board/asus/transformer-t114/Kconfig"
 source "board/nvidia/dalmore/Kconfig"
+source "board/nvidia/tegratab/Kconfig"
 
 endif
