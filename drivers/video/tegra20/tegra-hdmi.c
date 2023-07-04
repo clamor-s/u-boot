@@ -143,6 +143,7 @@ static void tegra_hdmi_setup_tmds(struct tegra_hdmi_priv *priv,
 
 static int tegra_hdmi_encoder_enable(struct udevice *dev)
 {
+#if 0
 	struct tegra_dc_plat *dc_plat = dev_get_plat(dev);
 	struct tegra_hdmi_priv *priv = dev_get_priv(dev);
 	struct dc_ctlr *dc = dc_plat->dc;
@@ -289,6 +290,7 @@ static int tegra_hdmi_encoder_enable(struct udevice *dev)
 	writel(value, &dc->win.win_opt);
 
 	tegra_dc_enable_controller(dev);
+#endif
 
 	return 0;
 }
