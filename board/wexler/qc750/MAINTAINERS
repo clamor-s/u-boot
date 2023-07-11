@@ -1,0 +1,6 @@
+X3 BOARD
+M:	Svyatoslav Ryhel <clamor95@gmail.com>
+S:	Maintained
+F:	board/wexler/qc750/
+F:	configs/qc750_defconfig
+F:	include/configs/qc750.h
