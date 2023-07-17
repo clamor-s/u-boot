@@ -159,6 +159,25 @@ int regulator_get_enable(struct udevice *dev)
 	return ops->get_enable(dev);
 }
 
+/*
+ * Enable or Disable a regulator
+ *
+ * This is a reentrant function and subsequent calls that enable will
+ * increase an internal counter, and disable calls will decrease the counter.
+ * The actual resource will be enabled when the counter gets to 1 coming from 0,
+ * and disabled when it reaches 0 coming from 1.
+ *
+ * @dev: regulator device
+ * @enable: bool indicating whether to enable or disable the regulator
+ * @return:
+ * 0 on Success
+ * -EBUSY if the regulator cannot be disabled because it's requested by
+ *        another device
+ * -EALREADY if the regulator has already been enabled or has already been
+ *        disabled
+ * -EACCES if there is no possibility to enable/disable the regulator
+ * -ve on different error situation
+ */
 int regulator_set_enable(struct udevice *dev, bool enable)
 {
 	const struct dm_regulator_ops *ops = dev_get_driver_ops(dev);
@@ -171,6 +190,23 @@ int regulator_set_enable(struct udevice *dev, bool enable)
 	uc_pdata = dev_get_uclass_plat(dev);
 	if (!enable && uc_pdata->always_on)
 		return -EACCES;
+
+	/* If previously enabled, increase count */
+	if (enable && uc_pdata->enable_count > 0) {
+		uc_pdata->enable_count++;
+		return -EALREADY;
+	}
+
+	if (!enable) {
+		if (uc_pdata->enable_count > 1) {
+			/* If enabled multiple times, decrease count */
+			uc_pdata->enable_count--;
+			return -EBUSY;
+		} else if (!uc_pdata->enable_count) {
+			/* If already disabled, do nothing */
+			return -EALREADY;
+		}
+	}
 
 	if (uc_pdata->ramp_delay)
 		old_enable = regulator_get_enable(dev);
@@ -186,6 +222,11 @@ int regulator_set_enable(struct udevice *dev, bool enable)
 			}
 		}
 	}
+
+	if (enable)
+		uc_pdata->enable_count++;
+	else
+		uc_pdata->enable_count--;
 
 	return ret;
 }
