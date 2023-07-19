@@ -194,6 +194,24 @@ int dm_test_power_regulator_set_enable_if_allowed(struct unit_test_state *uts)
 	ut_assertok(regulator_set_enable_if_allowed(dev, val_set));
 	ut_asserteq(regulator_get_enable(dev), !val_set);
 
+	/* Set the Enable of LDO1 - default is disabled */
+	platname = regulator_names[LDO1][PLATNAME];
+	ut_assertok(regulator_get_by_platname(platname, &dev));
+	ut_assertok(regulator_set_enable_if_allowed(dev, true));
+
+	/* Get the Enable state of LDO1 and compare it with the requested one */
+	ut_asserteq(regulator_get_enable(dev), true);
+
+	/* Emulate second consumer */
+	ut_assertok(regulator_set_enable_if_allowed(dev, true));
+	ut_asserteq(regulator_get_enable(dev), true);
+
+	/* Emulate one of counsumers disable call */
+	ut_assertok(regulator_set_enable_if_allowed(dev, false));
+
+	/* Regulator should still be on since counter indicates one consumer active */
+	ut_asserteq(regulator_get_enable(dev), true);
+
 	return 0;
 }
 DM_TEST(dm_test_power_regulator_set_enable_if_allowed, UT_TESTF_SCAN_FDT);
