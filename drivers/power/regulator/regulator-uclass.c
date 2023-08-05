@@ -473,6 +473,7 @@ static int regulator_post_bind(struct udevice *dev)
 {
 	struct dm_regulator_uclass_plat *uc_pdata;
 	const char *property = "regulator-name";
+	int ret;
 
 	uc_pdata = dev_get_uclass_plat(dev);
 
@@ -486,13 +487,20 @@ static int regulator_post_bind(struct udevice *dev)
 			return -EINVAL;
 	}
 
-	if (regulator_name_is_unique(dev, uc_pdata->name))
-		return 0;
+	ret = regulator_name_is_unique(dev, uc_pdata->name);
+	if (!ret) {
+		debug("'%s' of dev: '%s', has nonunique value: '%s'\n",
+		      property, dev->name, uc_pdata->name);
+		return -EINVAL;
+	}
 
-	debug("'%s' of dev: '%s', has nonunique value: '%s\n",
-	      property, dev->name, uc_pdata->name);
+	uc_pdata->always_on = dev_read_bool(dev, "regulator-always-on");
+	uc_pdata->boot_on = dev_read_bool(dev, "regulator-boot-on");
 
-	return -EINVAL;
+	if (uc_pdata->always_on || uc_pdata->boot_on)
+		dev_or_flags(dev, DM_FLAG_PROBE_AFTER_BIND);
+
+	return 0;
 }
 
 static int regulator_pre_probe(struct udevice *dev)
@@ -544,6 +552,17 @@ static int regulator_pre_probe(struct udevice *dev)
 		uc_pdata->flags |= REGULATOR_FLAG_AUTOSET_UA;
 
 	return 0;
+}
+
+static int regulator_post_probe(struct udevice *dev)
+{
+	int ret;
+
+	ret = regulator_autoset(dev);
+	if (ret == -EMEDIUMTYPE || ret == -ENOSYS)
+		return 0;
+
+	return ret;
 }
 
 int regulators_enable_boot_on(bool verbose)
@@ -603,5 +622,6 @@ UCLASS_DRIVER(regulator) = {
 	.name		= "regulator",
 	.post_bind	= regulator_post_bind,
 	.pre_probe	= regulator_pre_probe,
+	.post_probe	= regulator_post_probe,
 	.per_device_plat_auto	= sizeof(struct dm_regulator_uclass_plat),
 };
