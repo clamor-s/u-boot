@@ -168,7 +168,8 @@ static int dm_test_power_regulator_set_get_enable(struct unit_test_state *uts)
 	/* Set the Enable of LDO1 - default is disabled */
 	platname = regulator_names[LDO1][PLATNAME];
 	ut_assertok(regulator_get_by_platname(platname, &dev));
-	ut_assertok(regulator_set_enable(dev, val_set));
+	/* LDO1 has boot-on property so enable should return -EALREADY */
+	ut_asserteq(regulator_set_enable(dev, val_set), -EALREADY);
 
 	/* Get the Enable state of LDO1 and compare it with the requested one */
 	ut_asserteq(regulator_get_enable(dev), val_set);
@@ -187,7 +188,8 @@ int dm_test_power_regulator_set_enable_if_allowed(struct unit_test_state *uts)
 
 	/* Get BUCK1 - always on regulator */
 	platname = regulator_names[BUCK1][PLATNAME];
-	ut_assertok(regulator_autoset_by_name(platname, &dev_autoset));
+	/* BUCK1 has always-on property so autoset should return -EALREADY */
+	ut_asserteq(regulator_autoset_by_name(platname, &dev_autoset), -EALREADY);
 	ut_assertok(regulator_get_by_platname(platname, &dev));
 
 	/* Try disabling always-on regulator */
@@ -307,7 +309,8 @@ static int dm_test_power_regulator_autoset(struct unit_test_state *uts)
 	 * Expected output state: uV=1200000; uA=200000; output enabled
 	 */
 	platname = regulator_names[BUCK1][PLATNAME];
-	ut_assertok(regulator_autoset_by_name(platname, &dev_autoset));
+	/* BUCK1 has always-on property so autoset should return -EALREADY */
+	ut_asserteq(regulator_autoset_by_name(platname, &dev_autoset), -EALREADY);
 
 	/* Check, that the returned device is proper */
 	ut_assertok(regulator_get_by_platname(platname, &dev));
