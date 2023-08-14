@@ -423,6 +423,9 @@ static int tegra_lcd_of_to_plat(struct udevice *dev)
 
 		dc_plat->dev = dev;
 		dc_plat->dc = priv->dc;
+
+		if (!strcmp(dev->name, TEGRA_DC_B))
+			dc_plat->pipe = 1;
 	}
 
 	ret = panel_get_display_timing(priv->panel, &priv->timing);
