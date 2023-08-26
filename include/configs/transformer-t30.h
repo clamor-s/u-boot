@@ -18,6 +18,10 @@
 /* Board-specific serial config */
 #define CFG_SYS_NS16550_COM1		NV_PA_APB_UARTA_BASE
 
+/* Used for downstream */
+#define CONFIG_MACH_TYPE		MACH_TYPE_CARDHU
+#define CONFIG_PRAM 4096		/* 2MB + 2MB from end is trustzone */
+
 #include "tegra-common-post.h"
 
 #endif /* __CONFIG_H */
