@@ -7,6 +7,32 @@
 	model = "ASUS Transformer Prime TF201";
 	compatible = "asus,tf201", "nvidia,tegra30";
 
+	reserved-memory {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges;
+
+		framebuffer@abc01000 {
+			reg = <0xabc01000 2048000>;
+			no-map;
+		};
+	};
+
+	framebuffer@abc01000 {
+		compatible = "simple-framebuffer";
+		reg = <0xabc01000 2048000>;
+		width = <1280>;
+		height = <800>;
+		stride = <2560>;
+		format = "r5g6b5";
+	};
+
+	/delete-node/ host1x@50000000;
+	/delete-node/ backlight;
+	/delete-node/ panel;
+	/delete-node/ regulator-pnl;
+	/delete-node/ regulator-bl;
+
 	usb-phy@7d008000 {
 		/delete-property/ nvidia,xcvr-setup-use-fuses;
 		nvidia,xcvr-setup = <5>;      /* Based on TF201 fuse value - 48 */
