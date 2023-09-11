@@ -147,11 +147,26 @@ struct tc358768_priv {
 
 static int tc358768_read16(struct udevice *dev, u32 reg, u16 *val)
 {
-	u8 buf[2];
+        struct i2c_msg msg[2];
+        u8 buf[4];
 	int ret;
 
-	ret = dm_i2c_read(dev, reg, buf, 2);
-	*val = (buf[0] << 8) | buf[1];
+	msg[0].addr = 0x07;
+	msg[0].flags = 0;
+	msg[0].len = 2;
+	msg[0].buf = buf;
+
+	/* high byte goes out first */
+	buf[0] = (u8) (reg >> 8);
+	buf[1] = (u8) (reg & 0xff);
+
+	msg[1].addr = 0x07;
+	msg[1].flags = I2C_M_RD;
+	msg[1].len = 2;
+	msg[1].buf = buf + 2;
+
+	ret = dm_i2c_xfer(dev, msg, 2);
+	*val = (buf[2] << 8) | buf[3];
 	printf("%s 0x%04x<<0x%04x\n", __func__, reg, *val);
 
 	return ret;
@@ -159,13 +174,21 @@ static int tc358768_read16(struct udevice *dev, u32 reg, u16 *val)
 
 static int tc358768_write16(struct udevice *dev, u32 reg, u16 val)
 {
-	u8 buf[2];
+	struct i2c_msg msg;
+	u8 buf[4];
 
-	buf[1] = val & 0xff;
-	buf[0] = val >> 8;
+        buf[0] = (u8) (reg >> 8);
+        buf[1] = (u8) (reg & 0xff);
+        buf[2] = (u8) (val >> 8);
+        buf[3] = (u8) (val & 0xff);
+	
+	msg.addr = 0x07;
+	msg.flags = 0;
+	msg.len = 4;
+	msg.buf = buf;
+
 	printf("%s 0x%04x>>0x%04x\n", __func__, reg, val);
-
-	return dm_i2c_write(dev, reg, buf, 2);
+	return dm_i2c_xfer(dev, &msg, 1);
 }
 
 static void tc358768_read(struct udevice *dev, u32 reg, u32 *val)
@@ -491,7 +514,6 @@ static int tc358768_attach(struct udevice *dev)
 		return -EINVAL;
 	}
 
-#if 0
 	/* VSDly[9:0] */
 	video_start = max(video_start, internal_delay + 1) - internal_delay;
 	tc358768_write(dev, TC358768_VSDLY, video_start);
@@ -687,7 +709,6 @@ static int tc358768_attach(struct udevice *dev)
 	ret = panel_set_backlight(priv->panel, BACKLIGHT_DEFAULT);
 	if (ret)
 		return ret;
-#endif
 
 	return 0;
 }
@@ -741,22 +762,22 @@ static int tc358768_setup(struct udevice *dev)
 	ret = device_get_supply_regulator(dev, "vddc-supply", &priv->vddc);
 	if (ret) {
 		printf("%s: vddc regulator error: %d\n", __func__, ret);
-		if (ret != -ENOENT)
-			return log_ret(ret);
+//		if (ret != -ENOENT)
+//			return log_ret(ret);
 	}
 
 	ret = device_get_supply_regulator(dev, "vddmipi-supply", &priv->vddmipi);
 	if (ret) {
 		printf("%s: vddmipi regulator error: %d\n", __func__, ret);
-		if (ret != -ENOENT)
-			return log_ret(ret);
+//		if (ret != -ENOENT)
+//			return log_ret(ret);
 	}
 
 	ret = device_get_supply_regulator(dev, "vddio-supply", &priv->vddio);
 	if (ret) {
 		printf("%s: vddio regulator error: %d\n", __func__, ret);
-		if (ret != -ENOENT)
-			return log_ret(ret);
+//		if (ret != -ENOENT)
+//			return log_ret(ret);
 	}
 
 	/* get clk */

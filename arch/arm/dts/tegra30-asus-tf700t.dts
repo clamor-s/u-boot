@@ -63,7 +63,8 @@
 				reset-gpios = <&gpio TEGRA_GPIO(N, 6) GPIO_ACTIVE_LOW>;
 
 				vddc-supply = <&vdd_1v2_mipi>;
-				vddio-supply = <&vdd_1v8_vio>;
+				vddio-supply = <&vdd_1v2_mipi>;
+				//vddio-supply = <&vdd_1v8_vio>;
 				vddmipi-supply = <&vdd_1v2_mipi>;
 
 				panel = <&panel>;
